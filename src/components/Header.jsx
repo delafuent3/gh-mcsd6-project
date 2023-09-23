@@ -3,16 +3,16 @@ import logo from "../images/header_logo.jpg"
 
 export default function Header() {
     return (
-        <div>
-            <header>
+        <div className="bg-white border-b shadow-sm sticky top-0 z-40">
+            <header className="flex justify-between items-center px-3 max-w-6xl mx-auto">
                 {/* -------------------------------------------------------------------------------- LOGO ---------- */}
                 <div>
-                    <img src={logo} alt="Logo"/>
+                    <img src={logo} alt="Logo" className="h-5 cursor-pointer"/>
                 </div>
 
                 {/* -------------------------------------------------------------------------------- MENU ---------- */}
                 <div>
-                    <ul>
+                    <ul className="flex space-x-10">
                         <li>
                             Home
                         </li>
