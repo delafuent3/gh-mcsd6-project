@@ -17,6 +17,22 @@ export default function SignUp() {
     // ---------------------------------------------------------------------------------- HOOK - showPassword ----------
     const [showPassword, setShowPassword] = useState(false)
 
+    // -------------------------------------------------------------------------------------- HOOK - formData ----------
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        password: "",
+    });
+
+    // ------------------------------------------------------------------------------- DESTRUCTURE - formData ----------
+    const { name, email, password } = formData;
+
+    // ---------------------------------------------------------------------------------- FUNCTION - onChange ----------
+    function onChange(event){
+        setFormData((prevState)=> ({
+            ...prevState, [event.target.id]: event.target.value,
+        }))
+    }
 
     return (
         <section>
@@ -40,6 +56,8 @@ export default function SignUp() {
                             id="name"
                             autoComplete="off"
                             placeholder="Full Name"
+                            value={name}
+                            onChange={onChange}
                             className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                         />
 
@@ -50,6 +68,8 @@ export default function SignUp() {
                             id="email"
                             autoComplete="off"
                             placeholder="Email address"
+                            value={email}
+                            onChange={onChange}
                             className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                         />
 
@@ -60,6 +80,8 @@ export default function SignUp() {
                                 id="password"
                                 autoComplete="off"
                                 placeholder="Password"
+                                value={password}
+                                onChange={onChange}
                                 className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                             />
                             {/* ------------------------------------------------------ SHOW/HIDE PASSWORD ---------- */}
