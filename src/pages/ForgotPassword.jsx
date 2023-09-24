@@ -7,7 +7,23 @@ import {Link} from "react-router-dom";
 // Import Components
 import OAuth from "../components/OAuth";
 
+// Import Hooks
+import {useState} from "react";
+
 export default function ForgotPassword() {
+    // -------------------------------------------------------------------------------------- HOOK - formData ----------
+    const [email, setEmail] = useState("");
+
+    // ---------------------------------------------------------------------------------- FUNCTION - onChange ----------
+    function onChange(e) {
+        setEmail(e.target.value);
+    }
+
+
+
+
+
+
     return (
         <section>
             <h1 className="text-3xl text-center mt-6 font-bold">Forgot Password</h1>
@@ -30,6 +46,8 @@ export default function ForgotPassword() {
                             id="email"
                             autoComplete="off"
                             placeholder="Email address"
+                            value={email}
+                            onChange={onChange}
                             className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                         />
 
