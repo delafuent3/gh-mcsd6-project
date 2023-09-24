@@ -4,10 +4,19 @@ import keyImage from "../images/login_key.jpg"
 // Import Libraries
 import {Link} from "react-router-dom";
 
+// Import Hooks
+import {useState} from "react";
+
 // Import Components
 import OAuth from "../components/OAuth";
 
+// Import Icons
+import {AiFillEyeInvisible,AiFillEye} from "react-icons/ai"
+
 export default function SignIn() {
+    // ---------------------------------------------------------------------------------- HOOK - showPassword ----------
+    const [showPassword, setShowPassword] = useState(false)
+
     return (
         <section>
             <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
@@ -36,12 +45,25 @@ export default function SignIn() {
                         {/* ------------------------------------------------------------ INPUT - PASSWORD ---------- */}
                         <div className="relative mb-6">
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 id="password"
                                 autoComplete="off"
                                 placeholder="Password"
                                 className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                             />
+
+                            {/* ------------------------------------------------------ SHOW/HIDE PASSWORD ---------- */}
+                            {showPassword ? (
+                                <AiFillEyeInvisible
+                                    className="absolute right-3 top-3 text-xl cursor-pointer"
+                                    onClick={()=>setShowPassword(prevState => !prevState)}
+                                />
+                            ) : (
+                                <AiFillEye
+                                    className="absolute right-3 top-3 text-xl cursor-pointer"
+                                    onClick={()=>setShowPassword(prevState => !prevState)}
+                                />
+                            )}
                         </div>
 
 
