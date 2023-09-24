@@ -17,6 +17,22 @@ export default function SignIn() {
     // ---------------------------------------------------------------------------------- HOOK - showPassword ----------
     const [showPassword, setShowPassword] = useState(false)
 
+    // -------------------------------------------------------------------------------------- HOOK - formData ----------
+    const [formData, setFormData] = useState({
+        email: "",
+        password: ""
+    })
+
+    // ------------------------------------------------------------------------------- DESTRUCTURE - formData ----------
+    const { email, password} = formData
+
+    // ---------------------------------------------------------------------------------- FUNCTION - onChange ----------
+    function onChange(event){
+        setFormData((prevState)=> ({
+            ...prevState, [event.target.id]: event.target.value,
+        }))
+    }
+
     return (
         <section>
             <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
@@ -24,7 +40,7 @@ export default function SignIn() {
             {/* ------------------------------------------------------------------------------ DIV - MAIN ---------- */}
             <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
 
-                {/* ------------------------------------------------------------------------------- IMAGE ---------- */}
+                {/* ------------------------------------------------------------------------- IMAGE - Key ---------- */}
                 <div className="md:w-[67%] lg:w-[50%] mb-12 md:mb-6">
                     <img src={keyImage} alt="key" className="w-full rounded-2xl"/>
                 </div>
@@ -39,6 +55,8 @@ export default function SignIn() {
                             id="email"
                             autoComplete="off"
                             placeholder="Email address"
+                            value={email}
+                            onChange={onChange}
                             className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                         />
 
@@ -49,6 +67,8 @@ export default function SignIn() {
                                 id="password"
                                 autoComplete="off"
                                 placeholder="Password"
+                                value={password}
+                                onChange={onChange}
                                 className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                             />
 
