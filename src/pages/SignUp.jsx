@@ -7,7 +7,17 @@ import {Link} from "react-router-dom";
 // Import Components
 import OAuth from "../components/OAuth";
 
+// Import Icons
+import {AiFillEyeInvisible, AiFillEye} from "react-icons/ai"
+
+// Import Hooks
+import {useState} from "react";
+
 export default function SignUp() {
+    // ---------------------------------------------------------------------------------- HOOK - showPassword ----------
+    const [showPassword, setShowPassword] = useState(false)
+
+
     return (
         <section>
             <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
@@ -46,12 +56,25 @@ export default function SignUp() {
                         {/* ------------------------------------------------------------ INPUT - PASSWORD ---------- */}
                         <div className="relative mb-6">
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 id="password"
                                 autoComplete="off"
                                 placeholder="Password"
                                 className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition ease-in-out"
                             />
+                            {/* ------------------------------------------------------ SHOW/HIDE PASSWORD ---------- */}
+                            {showPassword ? (
+                                <AiFillEyeInvisible
+                                    className="absolute right-3 top-3 text-xl cursor-pointer"
+                                    onClick={() => setShowPassword(prevState => !prevState)}
+                                />
+                            ) : (
+                                <AiFillEye
+                                    className="absolute right-3 top-3 text-xl cursor-pointer"
+                                    onClick={() => setShowPassword(prevState => !prevState)}
+                                />
+                            )}
+
                         </div>
 
 
@@ -82,7 +105,8 @@ export default function SignUp() {
                         </button>
 
                         {/* -------------------------------------------------------------- PARAGRAPH - OR ---------- */}
-                        <div className="flex items-center  my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
+                        <div
+                            className="flex items-center  my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
                             <p className="text-center font-semibold mx-4">OR</p>
                         </div>
 
