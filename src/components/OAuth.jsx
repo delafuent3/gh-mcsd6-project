@@ -1,5 +1,11 @@
+// Import Google icon from react-icons
+import {FcGoogle} from "react-icons/fc";
+
 export default function OAuth() {
     return (
-        <div>OAuth</div>
+        <button>
+            <FcGoogle/>
+            Continue with Google
+        </button>
     )
 }
