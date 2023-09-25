@@ -2,7 +2,7 @@
 import keyImage from "../images/login_key.jpg"
 
 // Import Libraries
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 // Import Hooks
 import {useState} from "react";
@@ -22,6 +22,9 @@ export default function SignIn() {
         email: "",
         password: ""
     })
+
+    // -------------------------------------------------------------------------------------- HOOK - navigate ----------
+    const navigate = useNavigate();
 
     // ------------------------------------------------------------------------------- DESTRUCTURE - formData ----------
     const { email, password} = formData
@@ -93,6 +96,7 @@ export default function SignIn() {
                                 Don't have a account?
                                 <Link
                                     className="text-red-600 hover:text-red-700 transition duration-200 ease-in-out ml-1"
+                                    to="/sign-up"
                                 >
                                     Register
                                 </Link>
@@ -100,6 +104,7 @@ export default function SignIn() {
                             <p>
                                 <Link
                                     className="text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out"
+                                    to="/forgot-password"
                                 >
                                     Forgot password?
                                 </Link>
