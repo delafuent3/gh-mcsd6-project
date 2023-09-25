@@ -99,7 +99,6 @@ export default function SignUp() {
 
                         </div>
 
-
                         {/* ------------------------------------------------------------------------------- LINKS ---------- */}
                         <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg">
                             <p className="mb-6">
