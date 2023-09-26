@@ -12,26 +12,78 @@ import {AiFillEyeInvisible, AiFillEye} from "react-icons/ai"
 
 // Import Hooks
 import {useState} from "react";
+import {useNavigate} from "react-router-dom";
+
+// Import OAuth
+import {getAuth, createUserWithEmailAndPassword, updateProfile} from "firebase/auth"
+
+// Import from Firestore
+import {serverTimestamp, doc, setDoc, collection} from "firebase/firestore"
+
+// Import - Toastify
+import {toast} from "react-toastify";
+
+// Import Firebase db
+//import { db } from "../firebase";
+import {db} from "../firebase"
 
 export default function SignUp() {
-    // ---------------------------------------------------------------------------------- HOOK - showPassword ----------
+    // ----------------------------------------------------------------------- HOOK - useState - showPassword ----------
     const [showPassword, setShowPassword] = useState(false)
 
-    // -------------------------------------------------------------------------------------- HOOK - formData ----------
+    // --------------------------------------------------------------------------- HOOK - useState - formData ----------
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
     });
 
+    // ---------------------------------------------------------------------------------- HOOK - useNavigate ----------
+    const navigate = useNavigate();
+
     // ------------------------------------------------------------------------------- DESTRUCTURE - formData ----------
-    const { name, email, password } = formData;
+    const {name, email, password} = formData;
 
     // ---------------------------------------------------------------------------------- FUNCTION - onChange ----------
-    function onChange(event){
-        setFormData((prevState)=> ({
+    function onChange(event) {
+        setFormData((prevState) => ({
             ...prevState, [event.target.id]: event.target.value,
         }))
+    }
+
+    // ---------------------------------------------------------------------------------- FUNCTION - onSubmit ----------
+    async function onSubmit(e) {
+        e.preventDefault()
+
+        try {
+            const auth = getAuth()
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
+            // Update displayName
+            await updateProfile(auth.currentUser, {
+                displayName: name
+            })
+
+            const user = userCredential.user
+
+            // TODO: Fix - Add content from one object to another
+            // const formDataCopy = { ...formData };
+            // delete formDataCopy.password;
+            // formDataCopy.timestamp = serverTimestamp();
+
+            const formDataCopy = {
+                name: formData.name,
+                email: formData.email,
+                timestamp: serverTimestamp()
+            }
+
+            // Save Data in database
+            await setDoc(doc(db, "users", user.uid), formDataCopy);
+
+            navigate("/")
+        } catch (error) {
+            toast.error(error.code)
+        }
     }
 
     return (
@@ -49,7 +101,7 @@ export default function SignUp() {
                 {/* -------------------------------------------------------------------------- DIV - FORM ---------- */}
                 <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
                     {/* ---------------------------------------------------------------------------- FORM ---------- */}
-                    <form>
+                    <form onSubmit={onSubmit}>
                         {/* ---------------------------------------------------------------- INPUT - NAME ---------- */}
                         <input
                             type="text"
@@ -123,6 +175,7 @@ export default function SignUp() {
                         {/* ------------------------------------------------------------ BUTTON - SIGN IN ---------- */}
                         <button
                             className="w-full bg-blue-600 text-white px-7 py-3 text-sm font-medium uppercase rounded shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800"
+                            type="submit"
                         >
                             Sign up
                         </button>

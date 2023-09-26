@@ -12,6 +12,9 @@ import SignUp from "./pages/SignUp";
 // Import Components
 import Header from "./components/Header";
 
+// COMPONENT - ToastContainer
+import {ToastContainer} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -30,6 +33,18 @@ function App() {
                     <Route path="/sign-up" element={<SignUp/>}/>
                 </Routes>
             </Router>
+            <ToastContainer
+                position="bottom-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+            />
         </>
 
     );
