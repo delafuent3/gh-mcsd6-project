@@ -2,11 +2,16 @@ import {useState} from "react";
 
 import {getAuth} from "firebase/auth";
 
+// Import - HOOKS
+import {useNavigate} from "react-router-dom";
+
 export default function Profile(){
 
     // Initialize getAuth
     const auth = getAuth()
 
+    // ---------- HOOK - useNavigate ----------
+    const navigate = useNavigate()
 
     // Initialize formData
     const [formData, useFormData] = useState({
@@ -16,6 +21,13 @@ export default function Profile(){
 
     // Destructure formData
     const {name, email} = formData
+
+    // ---------- FUNCTION - onLogout ----------
+    function onLogout () {
+        auth.signOut()
+        navigate("/")
+    }
+
 
     return (
         <>
@@ -42,7 +54,10 @@ export default function Profile(){
                                 <span className="text-red-600 hover:text-red-700 transition ease-in-out duration-200 ml-1 cursor-pointer" >Edit</span>
                             </p>
 
-                            <p className="text-blue-600 hover:text-blue-800 transition ease-in-out duration-200 cursor-pointer">
+                            <p
+                                onClick={onLogout}
+                                className="text-blue-600 hover:text-blue-800 transition ease-in-out duration-200 cursor-pointer"
+                            >
                                 Sign out
                             </p>
                         </div>
