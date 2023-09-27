@@ -4,11 +4,30 @@ import logo from "../images/header_logo.jpg"
 // Import Hooks
 import {useLocation} from "react-router";
 import {useNavigate} from "react-router";
+import {useState, useEffect} from "react";
+
+// Import - FIREBASE
+import {getAuth, onAuthStateChanged} from "firebase/auth";
 
 export default function Header() {
     // ------------------------------------------------------------------------------------------------ HOOKS ----------
     const location = useLocation();
     const navigate = useNavigate();
+    const [ pageState, setPageState] = useState("Sign In")
+
+    // ---------- METHODS ----------
+    const auth = getAuth()
+
+    // useEffect
+    useEffect(()=> {
+        onAuthStateChanged(auth, (user) => {
+            if(user){
+                setPageState('Profile')
+            }else{
+                setPageState('Sign in')
+            }
+        })
+    }, [])
 
     // ---------------------------------------------------------------------------- FUNCTION - pathMatchRoute ----------
     function pathMatchRoute(route){
@@ -48,10 +67,10 @@ export default function Header() {
                         </li>
 
                         <li
-                            className={`cursor-pointer py-3 text-sm font-semibold border-b-[3px] ${pathMatchRoute("/sign-in") ? "text-black border-b-red-500" : "text-gray-400 border-b-transparent" }`}
-                            onClick={()=>navigate("/sign-in")}
+                            className={`cursor-pointer py-3 text-sm font-semibold border-b-[3px] ${(pathMatchRoute("/sign-in") || pathMatchRoute("/profile")) ? "text-black border-b-red-500" : "text-gray-400 border-b-transparent" }`}
+                            onClick={()=>navigate("/profile")}
                         >
-                            Sign In
+                            {pageState}
                         </li>
                     </ul>
                 </div>
