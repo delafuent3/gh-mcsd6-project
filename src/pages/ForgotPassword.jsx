@@ -10,6 +10,12 @@ import OAuth from "../components/OAuth";
 // Import Hooks
 import {useState} from "react";
 
+// Import toastify
+import {toast} from "react-toastify";
+
+// Import firebase methods
+import {getAuth, sendPasswordResetEmail} from "firebase/auth";
+
 export default function ForgotPassword() {
     // -------------------------------------------------------------------------------------- HOOK - formData ----------
     const [email, setEmail] = useState("");
@@ -19,8 +25,27 @@ export default function ForgotPassword() {
         setEmail(e.target.value);
     }
 
+    // ---------- FUNCTION - onSubmit ----------
+    // TODO: Fix non existing email validation (Doesnt catch error)
+    async function onSubmit(e) {
+        e.preventDefault()
 
+        try {
+            // Initialize getAuth
+            const auth = getAuth()
 
+            console.log(JSON.stringify("### Auth ### " + auth))
+            console.log("### Email ###" + email)
+
+            // Pass credentials to function
+            await sendPasswordResetEmail(auth, email)
+
+            toast.success("Email was sent")
+
+        } catch (error) {
+            toast.error("Couldnt sent reset password link")
+        }
+    }
 
 
 
@@ -39,7 +64,7 @@ export default function ForgotPassword() {
                 {/* -------------------------------------------------------------------------- DIV - FORM ---------- */}
                 <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
                     {/* ---------------------------------------------------------------------------- FORM ---------- */}
-                    <form>
+                    <form onSubmit={onSubmit}>
                         {/* --------------------------------------------------------------- INPUT - EMAIL ---------- */}
                         <input
                             type="email"
