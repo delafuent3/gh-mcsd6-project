@@ -13,6 +13,12 @@ import OAuth from "../components/OAuth";
 // Import Icons
 import {AiFillEyeInvisible,AiFillEye} from "react-icons/ai"
 
+// Import Firebase methods
+import {signInWithEmailAndPassword, getAuth} from "firebase/auth"
+
+// Import Toastify
+import {toast} from "react-toastify";
+
 export default function SignIn() {
     // ---------------------------------------------------------------------------------- HOOK - showPassword ----------
     const [showPassword, setShowPassword] = useState(false)
@@ -36,6 +42,25 @@ export default function SignIn() {
         }))
     }
 
+    // ---------- FUNCTION - onSubmit ----------
+    async function onSubmit(e) {
+        e.preventDefault() // Prevents the page to refresh
+
+        try {
+            // Initialize auth
+            const auth = getAuth()
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+
+            if (userCredential.user) {
+                navigate("/")
+            }
+
+
+        } catch (error) {
+            toast.error(error.code)
+        }
+    }
+
     return (
         <section>
             <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
@@ -51,7 +76,7 @@ export default function SignIn() {
                 {/* -------------------------------------------------------------------------- DIV - FORM ---------- */}
                 <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
                     {/* ---------------------------------------------------------------------------- FORM ---------- */}
-                    <form>
+                    <form onSubmit={onSubmit}>
                         {/* --------------------------------------------------------------- INPUT - EMAIL ---------- */}
                         <input
                             type="email"
