@@ -1,10 +1,17 @@
 import {useState} from "react";
+
+import {getAuth} from "firebase/auth";
+
 export default function Profile(){
+
+    // Initialize getAuth
+    const auth = getAuth()
+
 
     // Initialize formData
     const [formData, useFormData] = useState({
-        name: "Claudio",
-        email: "delafuente@outlook.com.au"
+        name: auth.currentUser.displayName,
+        email: auth.currentUser.email
     })
 
     // Destructure formData
