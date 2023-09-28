@@ -1,33 +1,77 @@
 import {useState} from "react";
 
-import {getAuth} from "firebase/auth";
+import {getAuth, updateProfile} from "firebase/auth";
 
 // Import - HOOKS
 import {useNavigate} from "react-router-dom";
 
-export default function Profile(){
+// Import - tastify
+import {toast} from "react-toastify";
 
-    // Initialize getAuth
+// Import db from Firebase (Local Configuration)
+import {db} from "../firebase";
+
+// Import - Firestore
+import {doc, updateDoc} from "firebase/firestore";
+
+export default function Profile() {
+    // ----------------------------------------------------------------------------------- Initialize getAuth ----------
     const auth = getAuth()
 
-    // ---------- HOOK - useNavigate ----------
+    // ----------------------------------------------------------------------------------- HOOK - useNavigate ----------
     const navigate = useNavigate()
 
     // Initialize formData
-    const [formData, useFormData] = useState({
+    const [formData, setFormData] = useState({
         name: auth.currentUser.displayName,
         email: auth.currentUser.email
     })
 
-    // Destructure formData
+    // ----------------------------------------------------------------------- HOOK - useState - changeDetail ----------
+    const [changeDetail, setChangeDetail] = useState(false)
+
+    // --------------------------------------------------------------------------------- Destructure formData ----------
     const {name, email} = formData
 
-    // ---------- FUNCTION - onLogout ----------
-    function onLogout () {
+    // -------------------------------------------------------------------------  ------- FUNCTION - onLogout ----------
+    function onLogout() {
         auth.signOut()
         navigate("/")
     }
 
+    // ---------------------------------------------------------------------------------- FUNCTION - onChange ----------
+    function onChange(e) {
+        setFormData((prevState) => ({
+            ...prevState, [e.target.id]: e.target.value
+        }))
+    }
+
+    // ---------------------------------------------------------------------------------- Function - onSubmit ----------
+    async function onSubmit() {
+        try{
+            // Check if logged in displayName has changed
+            if(auth.currentUser.displayName !== name){
+                // Update display name in firebase authentication
+                await updateProfile(auth.currentUser, {
+                    displayName: name
+                })
+
+                // Update name in firestore
+                // Create docReference - Parameters -> Database, Collection name,
+                const docRef = doc(db, "users", auth.currentUser.uid)
+
+                // Update document in Database
+                await updateDoc(docRef, {
+                    name
+                })
+            }
+            // Alert Successful change
+            toast.success("Profile details updated")
+
+        } catch (error) {
+            toast.error("Could not update the profile details")
+        }
+    }
 
     return (
         <>
@@ -37,21 +81,37 @@ export default function Profile(){
                     <form>
                         {/* INPUT - Name*/}
                         <input
-                            type="text" id="name" value={name} disabled
-                            className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out"
+                            type="text"
+                            id="name"
+                            value={name}
+                            disabled={!changeDetail}
+                            onChange={onChange}
+                            className={`mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out ${changeDetail && "bg-red-200 focus:bg-red-200"}`}
                         />
 
 
                         {/* INPUT - email */}
                         <input
-                            type="email" id="email" value={email} disabled
+                            type="email"
+                            id="email"
+                            value={email}
+                            disabled
                             className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out"
                         />
 
                         <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg mb-6">
                             <p className="flex items-center">
                                 Do you want to change your name?
-                                <span className="text-red-600 hover:text-red-700 transition ease-in-out duration-200 ml-1 cursor-pointer" >Edit</span>
+                                <span
+                                    className="text-red-600 hover:text-red-700 transition ease-in-out duration-200 ml-1 cursor-pointer"
+                                    // onClick={() => setChangeDetail((prevState) => !prevState)}
+                                    onClick={() => {
+                                        changeDetail && onSubmit();
+                                        setChangeDetail((prevState) => !prevState)
+                                    }}
+                                >
+                                    {changeDetail ? "Apply Change" : "Edit"}
+                                </span>
                             </p>
 
                             <p
