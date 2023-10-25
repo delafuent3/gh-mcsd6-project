@@ -40,7 +40,28 @@ export default function CreateListing() {
 
 
     // ---------------------------------------------------------------------------------- FUNCTION - onChange ----------
-    function onChange() {
+    function onChange(e) {
+        let boolean = null;
+        if (e.target.value === "true") {
+            boolean = true;
+        }
+        if (e.target.value === "false") {
+            boolean = false;
+        }
+        // Files
+        if (e.target.files) {
+            setFormData((prevState) => ({
+                ...prevState,
+                images: e.target.files,
+            }));
+        }
+        // Text/Boolean/Number
+        if (!e.target.files) {
+            setFormData((prevState) => ({
+                ...prevState,
+                [e.target.id]: boolean ?? e.target.value,
+            }));
+        }
     }
 
     return (
@@ -61,27 +82,32 @@ export default function CreateListing() {
                         type="button"
                         id="type"
                         value="sale"
-                        onChange={onChange}
-                        className={`mr-3 px-7 py-3  font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
-                            type === "rent" ? "bg-white text-black" : "bg-slate-600 text-white"
-
-                        }`}>
-                        Sell
+                        onClick={onChange}
+                        className={`mr-3 px-7 py-3 font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
+                            type === "rent"
+                                ? "bg-white text-black"
+                                : "bg-slate-600 text-white"
+                        }`}
+                    >
+                        sell
                     </button>
-
                     {/* ------------------------------------------------------------------- BUTTON - Rent ---------- */}
                     <button
                         type="button"
                         id="type"
                         value="rent"
-                        onChange={onChange}
-                        className={`ml-e px-7 py-3  font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
-                            type === "sale" ? "bg-white text-black" : "bg-slate-600 text-white"
-
-                        }`}>
-                        Rent
+                        onClick={onChange}
+                        className={`ml-3 px-7 py-3 font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
+                            type === "sale"
+                                ? "bg-white text-black"
+                                : "bg-slate-600 text-white"
+                        }`}
+                    >
+                        rent
                     </button>
                 </div>
+
+
                 {/* -------------------------------------------------------------------- INPUT - Name ---------- */}
                 <p className="text-lg mt-6 font-semibold">Name</p>
                 <input
