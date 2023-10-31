@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 import {getAuth, updateProfile} from "firebase/auth";
 
@@ -11,27 +11,39 @@ import {toast} from "react-toastify";
 // Import db from Firebase (Local Configuration)
 import {db} from "../firebase";
 
+import ListingItem from "../components/ListingItem";
+
 // Import - Firestore
-import {doc, updateDoc} from "firebase/firestore";
+import {
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    orderBy,
+    query,
+    updateDoc,
+    where,
+} from "firebase/firestore";
 
 // Import - Icon
-import  {FcHome} from "react-icons/fc";
+import {FcHome} from "react-icons/fc";
 
 export default function Profile() {
     // ----------------------------------------------------------------------------------- Initialize getAuth ----------
     const auth = getAuth()
 
-    // ----------------------------------------------------------------------------------- HOOK - useNavigate ----------
+    // ------------------------------------------------------------------------------------------------ HOOKS ----------
     const navigate = useNavigate()
+    const [changeDetail, setChangeDetail] = useState(false)
+    const [listings, setListings] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Initialize formData
+    // ---------------------------------------------------------------------------------- Initialize formData ----------
     const [formData, setFormData] = useState({
         name: auth.currentUser.displayName,
         email: auth.currentUser.email
     })
 
-    // ----------------------------------------------------------------------- HOOK - useState - changeDetail ----------
-    const [changeDetail, setChangeDetail] = useState(false)
 
     // --------------------------------------------------------------------------------- Destructure formData ----------
     const {name, email} = formData
@@ -51,9 +63,9 @@ export default function Profile() {
 
     // ---------------------------------------------------------------------------------- Function - onSubmit ----------
     async function onSubmit() {
-        try{
+        try {
             // Check if logged in displayName has changed
-            if(auth.currentUser.displayName !== name){
+            if (auth.currentUser.displayName !== name) {
                 // Update display name in firebase authentication
                 await updateProfile(auth.currentUser, {
                     displayName: name
@@ -73,6 +85,41 @@ export default function Profile() {
 
         } catch (error) {
             toast.error("Could not update the profile details")
+        }
+    }
+
+    // ------------------------------------------------------------------------------------- SHOW MY LISTINGS ----------
+    useEffect(() => {
+        async function fetchUserListings() {
+            const listingRef = collection(db, "listings");
+            const q = query(
+                listingRef,
+                where("userRef", "==", auth.currentUser.uid),
+                orderBy("timestamp", "desc")
+            );
+            const querySnap = await getDocs(q);
+            let listings = [];
+            querySnap.forEach((doc) => {
+                return listings.push({
+                    id: doc.id,
+                    data: doc.data(),
+                });
+            });
+            setListings(listings);
+            setLoading(false);
+        }
+
+        fetchUserListings();
+    }, [auth.currentUser.uid]);
+
+    async function onDelete(listingID) {
+        if (window.confirm("Are you sure you want to delete?")) {
+            await deleteDoc(doc(db, "listings", listingID));
+            const updatedListings = listings.filter(
+                (listing) => listing.id !== listingID
+            );
+            setListings(updatedListings);
+            toast.success("Successfully deleted the listing");
         }
     }
 
@@ -140,6 +187,36 @@ export default function Profile() {
                     </button>
                 </div>
             </section>
+
+            <div className="max-w-6xl px-3 mt-6 mx-auto">
+                {!loading && listings.length > 0 && (
+                    <>
+                        <h2 className="text-2xl text-center font-semibold mb-6">
+                            My Listings
+                        </h2>
+                        <ul>
+                            {listings.map((listing) => (
+                                <ListingItem
+                                    key={listing.id}
+                                    id={listing.id}
+                                    listing={listing.data}
+                                />
+                            ))}
+                        </ul>
+                        {/*<ul className="sm:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">*/}
+                        {/*    {listings.map((listing) => (*/}
+                        {/*        <ListingItem*/}
+                        {/*            key={listing.id}*/}
+                        {/*            id={listing.id}*/}
+                        {/*            listing={listing.data}*/}
+                        {/*            onDelete={() => onDelete(listing.id)}*/}
+                        {/*            onEdit={() => onEdit(listing.id)}*/}
+                        {/*        />*/}
+                        {/*    ))}*/}
+                        {/*</ul>*/}
+                    </>
+                )}
+            </div>
         </>
     )
 }
