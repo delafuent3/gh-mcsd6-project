@@ -10,6 +10,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import CreateListing from "./pages/CreateListing";
 import EditListing from "./pages/EditListing";
+import Listing from "./pages/Listing";
 
 // Import Components
 import Header from "./components/Header";
@@ -29,6 +30,10 @@ function App() {
                 {/* ------------------------------------------------------------------------------ ROUTES ---------- */}
                 <Routes>
                     <Route path="/forgot-password" element={<ForgotPassword/>}/>
+                    <Route
+                        path="/category/:categoryName/:listingId"
+                        element={<Listing/>}
+                    />
                     <Route path="/" element={<Home/>}/>
                     <Route path="/offers" element={<Offers/>}/>
                     <Route path="/profile" element={<PrivateRoute/>}>
