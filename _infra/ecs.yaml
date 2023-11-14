@@ -6,7 +6,7 @@ Parameters:
 
   ContainerPort:
     Type: Number
-    Default: 5000
+    Default: 3000
 
   LoadBalancerPort:
     Type: Number
@@ -38,7 +38,7 @@ Parameters:
   
   VpcId:
     Type: String
-    Default: vpc-0de0c60b380958c8f
+    Default: vpc-08115b4f3a21dca9a
 
 
 Resources:
@@ -231,8 +231,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Join ['-', [!Ref Environment, task-definition]]
-      Cpu: 256
-      Memory: 512
+      Cpu: 1024
+      Memory: 2048
       NetworkMode: awsvpc
       ExecutionRoleArn: !Ref ExecutionRole
       TaskRoleArn: !Ref TaskRole
