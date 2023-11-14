@@ -50,7 +50,7 @@ jobs:
 
         GIT_BUILD=$(git describe --all --long | tr "-" " " | awk '{ print $3 }')
 
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GIT_BUILD -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./app
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GIT_BUILD -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
 
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GIT_BUILD
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
