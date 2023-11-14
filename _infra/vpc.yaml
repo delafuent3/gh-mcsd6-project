@@ -1,0 +1,339 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Demo Template.
+  Resources
+
+Parameters:
+  Environment:
+    Type: String
+    Default: 'test'
+    Description: 'Name to be used for tagging and exports'
+
+  CreatedBy:
+    Type: String
+    Default: "delafuent3"
+
+  Owner:
+    Type: String
+    Default: "delafuente"
+
+  VPCCidr:
+    Type: String
+    Default: 10.2.0.0/16
+
+  NatGw:
+    Type: String
+    Default: 'No'
+    AllowedValues:
+      - 'No'
+      - 'Yes'
+
+  SubnetCidrBits:
+    Type: Number
+    Default: 8
+    MaxValue: 32
+    MinValue: 1
+    Description: "Number of bits to use for subnet cidr creation (bits = 32 - SubnetMask eg: for /26 = 32 - 26 = 6bits)"
+
+Conditions:
+  CreateNatGateway: !Equals [!Ref NatGw, 'Yes']
+
+Resources:
+  #------- VPC ------------------------------------------------------------------------------------
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-vpc"
+
+  #------- Internet Gateway -----------------------------------------------------------------------
+  Igw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-igw"
+
+  IgwAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: Vpc
+      InternetGatewayId:
+        Ref: Igw
+
+  #------- Public Subnets -------------------------------------------------------------------------
+  #------- Public Subnet 1 ------------------------------------------------------------------------
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      # CidrBlock: !Ref PublicSubnet1Cidr #10.0.0.0/18
+      CidrBlock: !Select [ 0, !Cidr [ !GetAtt Vpc.CidrBlock, 6, !Ref SubnetCidrBits ]]
+      VpcId:
+        Ref: Vpc
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-pub-snet-1"
+
+
+  #------- Public Subnet 2 ------------------------------------------------------------------------
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Select [ 1, !Cidr [ !GetAtt Vpc.CidrBlock, 6, !Ref SubnetCidrBits ]]
+      VpcId:
+        Ref: Vpc
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-pub-snet-2"
+
+  #------- App Subnets ----------------------------------------------------------------------------
+  #------- App Subnet 1 ---------------------------------------------------------------------------
+  AppSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Select [ 2, !Cidr [ !GetAtt Vpc.CidrBlock, 6, !Ref SubnetCidrBits ]]
+      VpcId:
+        Ref: Vpc
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-app-snet-1"
+
+  #------- App Subnet 2 ---------------------------------------------------------------------------
+  AppSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      # CidrBlock: !Ref PrivateSubnet2Cidr #10.0.192.0/18
+      CidrBlock: !Select [ 3, !Cidr [ !GetAtt Vpc.CidrBlock, 6, !Ref SubnetCidrBits ]]
+      VpcId:
+        Ref: Vpc
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-app-snet-2"
+
+  #------- NAT Gateway & EIP ----------------------------------------------------------------------
+  Eip:
+    Condition: CreateNatGateway
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-eip-1"
+
+  NatGateway:
+    Condition: CreateNatGateway
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - Eip
+          - AllocationId
+      SubnetId:
+        Ref: PublicSubnet1
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-nat-gw"
+
+  #------- Route Tables ---------------------------------------------------------------------------
+  #------- Public Route Tables --------------------------------------------------------------------
+  PublicSubnet1RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-pub-rt-1"
+
+  PublicSubnet2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-pub-rt-2"
+
+  #------- App Route Tables -----------------------------------------------------------------------
+  AppRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-app-rt-1"
+
+  AppRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+        - Key: CreatedBy
+          Value: !Ref CreatedBy
+        - Key: Name
+          Value: !Sub "${Owner}-${Environment}-app-rt-2"
+
+  #------- Route Table Associations ---------------------------------------------------------------
+  #------- Public Route Table Associations --------------------------------------------------------
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: PublicSubnet1RouteTable
+      SubnetId:
+        Ref: PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: PublicSubnet2RouteTable
+      SubnetId:
+        Ref: PublicSubnet2
+
+  #------- Private Route Table Associations -------------------------------------------------------
+  AppRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: AppRouteTable1
+      SubnetId:
+        Ref: AppSubnet1
+
+  AppRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: AppRouteTable2
+      SubnetId:
+        Ref: AppSubnet2
+
+  #------- Default Routes -------------------------------------------------------------------------
+  #------- Default Routes - Public ----------------------------------------------------------------
+  PublicSubnet1DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PublicSubnet1RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: Igw
+    DependsOn:
+      - Igw
+
+  VPCPublicSubnet2DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PublicSubnet2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: Igw
+    DependsOn:
+      - Igw
+
+  #------- Default Routes - App -------------------------------------------------------------------
+  AppDefaultRoute1:
+    Condition: CreateNatGateway
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: AppRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NatGateway
+
+  AppDefaultRoute2:
+    Condition: CreateNatGateway
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: AppRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NatGateway
+
+########## Exports ################################################################################
+Outputs:
+  # VPC Export
+  VpcId:
+    Description: The logical id of VPC.
+    Value: !Ref Vpc
+    Export:
+      Name: !Join [ "-", [ !Ref Owner, !Ref Environment, vpc-id ] ]
+
+  # Public subnet exports
+  PublicSubnet1Id:
+    Description: The logical id of Public subnet 1.
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Join [ "-", [ !Ref Owner, !Ref Environment, pub-snet-1-id ] ]
+  PublicSubnet2Id:
+    Description: The logical id of Public subnet 2.
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Join [ "-", [ !Ref Owner, !Ref Environment, pub-snet-2-id ] ]
+
+  # Private subnet exports
+  AppSubnet1Id:
+    Description: The logical id of App subnet 1.
+    Value: !Ref AppSubnet1
+    Export:
+      Name: !Join [ "-", [ !Ref Owner, !Ref Environment, app-snet-1-id ] ]
+
+  AppSubnet2Id:
+    Description: The logical id of App subnet 2.
+    Value: !Ref AppSubnet2
+    Export:
+      Name: !Join [ "-", [ !Ref Owner, !Ref Environment, app-snet-2-id ] ]
+
