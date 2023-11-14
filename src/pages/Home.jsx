@@ -114,7 +114,7 @@ export default function Home() {
             <div className="max-w-6xl mx-auto pt-4 space-y-6">
                 {offerListings && offerListings.length > 0 && (
                     <div className="m-2 mb-6">
-                        <h2 className="px-3 text-2xl mt-6 font-semibold">Recent offers</h2>
+                        <h2 className="px-3 text-2xl mt-6 font-semibold">Recent offers Listings</h2>
                         <Link to="/offers">
                             <p className="px-3 text-sm text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out">
                                 Show more offers
