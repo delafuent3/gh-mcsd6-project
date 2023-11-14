@@ -59,12 +59,12 @@ jobs:
 
 
     # Uncomment to DEPLOY
-#    - name: Deploy updated container
-#      run: |
-#        GIT_BUILD=$(git describe --all --long | tr "-" " " | awk '{ print $3 }')
-#        aws cloudformation deploy --stack-name mcsd-ecs-stack \
-#        --template-file _infra/ecs.yaml \
-#        --region ap-southeast-2 \
-#        --no-fail-on-empty-changeset \
-#        --parameter-overrides ImageVersion=$GIT_BUILD \
-#        --capabilities CAPABILITY_NAMED_IAM
+    - name: Deploy updated container
+      run: |
+        GIT_BUILD=$(git describe --all --long | tr "-" " " | awk '{ print $3 }')
+        aws cloudformation deploy --stack-name mcsd-ecs-stack \
+        --template-file _infra/ecs.yaml \
+        --region ap-southeast-2 \
+        --no-fail-on-empty-changeset \
+        --parameter-overrides ImageVersion=$GIT_BUILD \
+        --capabilities CAPABILITY_NAMED_IAM
